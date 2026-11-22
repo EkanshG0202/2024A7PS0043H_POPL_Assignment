@@ -63,7 +63,34 @@ clue_4(Solution) :-
     member(p('Ben', Dept, _, web), Solution),
     Dept \= testing.
 
+% clue_5(+Solution)
+% Declarative reading: In Solution, the friend whose favorite language is java
+% works in the design department.
+clue_5(Solution) :-
+    member(p(_, design, java, _), Solution).
 
+% clue_6(+Solution)
+% Declarative reading: In Solution, 'Carla' does not prefer embedded projects
+% and does not work in development.
+clue_6(Solution) :-
+    member(p('Carla', Dept, _, Project), Solution),
+    Project \= embedded,
+    Dept \= development.
+
+% clue_7(+Solution)
+% Declarative reading: In Solution, 'Dana' does not have java as favorite
+% language, and works in either research or testing.
+clue_7(Solution) :-
+    member(p('Dana', Dept, Lang, _), Solution),
+    Lang \= java,
+    member(Dept, [research, testing]).
+
+% clue_8(+Solution)
+% Declarative reading: In Solution, the friend who prefers data projects
+% works in research and does not use javascript.
+clue_8(Solution) :-
+    member(p(_, research, Lang, data), Solution),
+    Lang \= javascript.
 
 % clue(?N, +Solution)
 % Declarative reading: Clue number N holds in the complete assignment Solution.
@@ -71,4 +98,7 @@ clue(1, Solution) :- clue_1(Solution).
 clue(2, Solution) :- clue_2(Solution).
 clue(3, Solution) :- clue_3(Solution).
 clue(4, Solution) :- clue_4(Solution).
-
+clue(5, Solution) :- clue_5(Solution).
+clue(6, Solution) :- clue_6(Solution).
+clue(7, Solution) :- clue_7(Solution).
+clue(8, Solution) :- clue_8(Solution).

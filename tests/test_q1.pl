@@ -104,4 +104,94 @@ run_clue_1_to_4_tests :-
 
     writeln('PASS: Clues 1-4 passed all positive, negative, and count checks.').
 
-    
+    % run_clue_5_to_8_tests
+% Tests clues 5-8 independently on satisfying and violating candidates,
+% and verifies exact combinatoric counts over all 13,824 candidates.
+run_clue_5_to_8_tests :-
+    % --- Clue 5: favorite language = java -> department = design ---
+    clue(5, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     python,     embedded),
+        p('Dana',  research,    javascript, data)
+    ]),
+    \+ clue(5, [
+        p('Alex',  design,      python,     'AI'),
+        p('Ben',   development, java,       web),
+        p('Carla', testing,     'c++',      embedded),
+        p('Dana',  research,    javascript, data)
+    ]),
+
+    % --- Clue 6: Carla -> project \= embedded, department \= development ---
+    clue(6, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     python,     data),
+        p('Dana',  research,    javascript, embedded)
+    ]),
+    \+ clue(6, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     python,     embedded),
+        p('Dana',  research,    javascript, data)
+    ]),
+    \+ clue(6, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   testing,     'c++',      web),
+        p('Carla', development, python,     data),
+        p('Dana',  research,    javascript, embedded)
+    ]),
+
+    % --- Clue 7: Dana -> language \= java, dept in {research, testing} ---
+    clue(7, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     python,     embedded),
+        p('Dana',  research,    javascript, data)
+    ]),
+    clue(7, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', research,    python,     embedded),
+        p('Dana',  testing,     javascript, data)
+    ]),
+    \+ clue(7, [
+        p('Alex',  design,      python,     'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     javascript, embedded),
+        p('Dana',  research,    java,       data)
+    ]),
+    \+ clue(7, [
+        p('Alex',  research,    java,       'AI'),
+        p('Ben',   testing,     'c++',      web),
+        p('Carla', development, python,     embedded),
+        p('Dana',  design,      javascript, data)
+    ]),
+
+    % --- Clue 8: project = data -> department = research, lang \= javascript ---
+    clue(8, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     javascript, embedded),
+        p('Dana',  research,    python,     data)
+    ]),
+    \+ clue(8, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     python,     data),
+        p('Dana',  research,    javascript, embedded)
+    ]),
+    \+ clue(8, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, 'c++',      web),
+        p('Carla', testing,     python,     embedded),
+        p('Dana',  research,    javascript, data)
+    ]),
+
+    % --- Verify no hidden over-constraints via exact candidate counts ---
+    findall(S, (candidate_solution(S), clue(5, S)), S5), length(S5, 3456),
+    findall(S, (candidate_solution(S), clue(6, S)), S6), length(S6, 7776),
+    findall(S, (candidate_solution(S), clue(7, S)), S7), length(S7, 5184),
+    findall(S, (candidate_solution(S), clue(8, S)), S8), length(S8, 2592),
+
+    writeln('PASS: Clues 5-8 passed all positive, negative, and count checks.').
