@@ -145,3 +145,68 @@ run_format_tests :-
     length(UniqueStrs, 320),
 
     writeln('PASS: Canonical expression and equation formatter verified.').
+
+    % run_search_tests
+% Tests valid_equation_tree/2 across empty/singleton lists, unsolvable inputs,
+% multiple split positions, exact division filtering, and leaf order.
+run_search_tests :-
+    % 1. Lists of length 0 and 1 fail cleanly
+    \+ valid_equation_tree([], _),
+    \+ valid_equation_tree([5], _),
+
+    % 2. Short unsolvable lists fail cleanly
+    \+ valid_equation_tree([2, 3], _),
+    \+ valid_equation_tree([2, 3, 4], _),
+
+    % 3. Two-element solvable lists (single split position)
+    findall(Eq, valid_equation_tree([2, 2], Eq), Eqs22),
+    Eqs22 = [eq(num(2), num(2))],
+
+    findall(Eq, valid_equation_tree([0, 0], Eq), Eqs00),
+    Eqs00 = [eq(num(0), num(0))],
+
+    % 4. Three-element lists testing different split positions:
+    %    [2, 4, 8] -> split at index 2 (2*4 = 8)
+    findall(Str, (
+        valid_equation_tree([2, 4, 8], eq(L, R)),
+        equation_to_string(L, R, Str)
+    ), Strs248),
+    Strs248 = ["2*4=8"],
+
+    %    [8, 4, 2] -> split at index 1 (8 = 4*2) and index 2 (8/4 = 2)
+    findall(Str, (
+        valid_equation_tree([8, 4, 2], eq(L, R)),
+        equation_to_string(L, R, Str)
+    ), Strs842),
+    sort(Strs842, ["8/4=2", "8=4*2"]),
+
+    %    [1, 2, 1] -> split at index 1 with subtraction (1 = 2-1)
+    findall(Str, (
+        valid_equation_tree([1, 2, 1], eq(L, R)),
+        equation_to_string(L, R, Str)
+    ), Strs121),
+    Strs121 = ["1=2-1"],
+
+    % 5. Four-element list [4, 2, 5, 3] across all 3 split positions (7 equations)
+    findall(eq(L, R), valid_equation_tree([4, 2, 5, 3], eq(L, R)), Trees4253),
+    length(Trees4253, 7),
+    forall(member(eq(L, R), Trees4253), (
+        tree_leaves(L, LLeaves),
+        tree_leaves(R, RLeaves),
+        append(LLeaves, RLeaves, [4, 2, 5, 3])
+    )),
+    findall(Str, (
+        member(eq(L, R), Trees4253),
+        equation_to_string(L, R, Str)
+    ), Strs4253),
+    sort(Strs4253, [
+        "4*2-5=3",
+        "4*2=5+3",
+        "4-2=5-3",
+        "4/2=5-3",
+        "4=2*(5-3)",
+        "4=2+(5-3)",
+        "4=2+5-3"
+    ]),
+
+    writeln('PASS: Equation tree search verified across split positions and edge cases.').

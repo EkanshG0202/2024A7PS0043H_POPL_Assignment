@@ -101,3 +101,16 @@ equation_to_string(LeftExpr, RightExpr, EqStr) :-
     expr_to_string(LeftExpr, LeftStr),
     expr_to_string(RightExpr, RightStr),
     atomics_to_string([LeftStr, "=", RightStr], EqStr).
+
+% valid_equation_tree(+Numbers, -EquationTree)
+% Declarative reading: EquationTree = eq(LeftExpr, RightExpr) is a valid
+% arithmetic equation over Numbers where LeftExpr is built from a non-empty
+% prefix, RightExpr is built from the remaining non-empty suffix, both sides
+% evaluate to valid integers, and their values are equal.
+valid_equation_tree(Numbers, eq(LeftExpr, RightExpr)) :-
+    split_nonempty(Numbers, LeftNums, RightNums),
+    build_expr(LeftNums, LeftExpr),
+    eval_expr(LeftExpr, LeftVal),
+    build_expr(RightNums, RightExpr),
+    eval_expr(RightExpr, RightVal),
+    LeftVal =:= RightVal.
