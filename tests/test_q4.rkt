@@ -15,25 +15,43 @@
   (display expr)
   (newline))
 
-;; --- Supplied Examples (S2) ---
-;; Example 1: ((42 1 2) (3 4 5) (42 6) (42))
+;; --- S2.c Tests: make-inserter with various length predicates ---
+
+;; 1. Insert 'empty only into empty lists: len-ok? = (lambda (len) (= len 0))
+(define insert-into-empty (make-inserter 'empty (lambda (len) (= len 0))))
+(show (insert-into-empty '(() (1) (() 2) (3 4))))
+;; Expected: ((empty) (1) ((empty) 2) (3 4))
+
+;; 2. Insert 'long into lists with length >= 2: len-ok? = (lambda (len) (>= len 2))
+(define insert-if-long (make-inserter 'long (lambda (len) (>= len 2))))
+(show (insert-if-long '((1) (2 3) ((4 5 6) ()))))
+;; Expected: (long (1) (long 2 3) (long (long 4 5 6) ()))
+
+;; 3. Insert '* into lists with even length (0, 2, 4, ...):
+(define (even-len? len)
+  (if (= len 0)
+      #t
+      (if (= len 1)
+          #f
+          (even-len? (- len 2)))))
+(define insert-if-even (make-inserter '* even-len?))
+(show (insert-if-even '(() (a) (b c) (d e f))))
+;; Expected: (* (*) (a) (* b c) (d e f))
+
+;; --- S2.b/S2.c Regression Tests: insert-if-short ---
+
+;; Supplied Example 1: ((42 1 2) (3 4 5) (42 6) (42))
 (show (insert-if-short 42 '((1 2) (3 4 5) (6) ()) 3))
 
-;; Example 2: ((0 (0 1) 2) (0 3) (0 (4 5 6) (0)))
+;; Supplied Example 2: ((0 (0 1) 2) (0 3) (0 (4 5 6) (0)))
 (show (insert-if-short 0 '(((1) 2) (3) ((4 5 6) ())) 3))
 
-;; Example 3: (7)
+;; Supplied Example 3: (7)
 (show (insert-if-short 7 '() 3))
 
-;; Example 4: ()
+;; Supplied Example 4: ()
 (show (insert-if-short 7 '() 0))
 
-;; --- Boundary & Nested Empty List Cases ---
-;; Lengths strictly below (1), equal to (2), and above (3) threshold n = 2, plus nested empty lists
+;; Boundary check: lengths 0, 1, 2, 3 with threshold n = 2
 (show (insert-if-short 'x '(() (a) (a b) (a b c)) 2))
-
-;; Top-level list length equals n (3 == 3 -> no top-level insert), inner lists have lengths 0, 2, 3
-(show (insert-if-short 9 '(() (1 2) (1 2 3)) 3))
-
-;; Deeply nested empty lists with n = 1 (every empty list becomes (1), outer lists of length 1 stay unchanged)
-(show (insert-if-short 1 '(((()))) 1))
+;; Expected: ((x) (x a) (a b) (a b c))

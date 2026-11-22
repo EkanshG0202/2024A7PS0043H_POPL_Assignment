@@ -16,16 +16,24 @@
       (cons (f (car lst))
             (my-map f (cdr lst)))))
 
-;; --- Conditional Insertion (S2.b) ---
+;; --- Higher-Order Conditional Insertion (S2.c) ---
+
+;; Returns a function taking a list and inserting atom x at the front of every
+;; list (at all nesting levels) whose original top-level length satisfies len-ok?
+(define (make-inserter x len-ok?)
+  (letrec ((insert-fn
+            (lambda (lst)
+              (let ((processed
+                     (my-map (lambda (elem)
+                               (if (or (null? elem) (pair? elem))
+                                   (insert-fn elem)
+                                   elem))
+                             lst)))
+                (if (len-ok? (my-length lst))
+                    (cons x processed)
+                    processed)))))
+    insert-fn))
 
 ;; Inserts atom x at the front of lst and every nested sublist whose original length < n
 (define (insert-if-short x lst n)
-  (let ((processed
-         (my-map (lambda (elem)
-                   (if (or (null? elem) (pair? elem))
-                       (insert-if-short x elem n)
-                       elem))
-                 lst)))
-    (if (< (my-length lst) n)
-        (cons x processed)
-        processed)))
+  ((make-inserter x (lambda (len) (< len n))) lst))
