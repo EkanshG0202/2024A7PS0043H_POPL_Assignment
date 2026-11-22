@@ -314,3 +314,86 @@ run_all_q2_tests :-
     run_generate_equation_tests,
     run_all_equations_tests,
     writeln('ALL Q2 TESTS PASSED.').
+
+% check_equation_invariants(+List)
+% Verifies that every equation in all_equations(List, Eqs) is an SWI-Prolog
+% string with no spaces, contains exactly one '=', is sorted by sort/2 without
+% duplicates, matches count_equations/2, and maps 1-to-1 from distinct ASTs.
+check_equation_invariants(List) :-
+    findall(Tree, valid_equation_tree(List, Tree), Trees),
+    all_equations(List, Eqs),
+    count_equations(List, N),
+    length(Eqs, N),
+    length(Trees, N),
+    sort(Eqs, SortedEqs),
+    Eqs == SortedEqs,
+    forall(member(Eq, Eqs), (
+        string(Eq),
+        \+ atom(Eq),
+        \+ sub_string(Eq, _, _, _, " "),
+        split_string(Eq, "=", "", [_, _])
+    )).
+
+% run_final_q2_audit
+% Runs comprehensive checks across all assignment examples and edge cases.
+run_final_q2_audit :-
+    % 1. Empty and single-element lists fail in generate_equation/2 and give [] / 0
+    \+ generate_equation([], _),
+    \+ generate_equation([0], _),
+    \+ generate_equation([9], _),
+    all_equations([], []), count_equations([], 0),
+    all_equations([0], []), count_equations([0], 0),
+    all_equations([9], []), count_equations([9], 0),
+
+    % 2. Assignment examples
+    all_equations([4, 2, 5, 3], Es4253),
+    Es4253 == [
+        "4*2-5=3",
+        "4*2=5+3",
+        "4-2=5-3",
+        "4/2=5-3",
+        "4=2*(5-3)",
+        "4=2+(5-3)",
+        "4=2+5-3"
+    ],
+    generate_equation([4, 2, 5, 3], One4253),
+    member(One4253, Es4253),
+
+    \+ generate_equation([2, 3, 4], _),
+    all_equations([2, 3, 4], []),
+    count_equations([2, 3, 4], 0),
+
+    all_equations([2, 4, 8], ["2*4=8"]),
+    generate_equation([2, 4, 8], "2*4=8"),
+    count_equations([2, 4, 8], 1),
+
+    % 3. Zero values & division-by-zero / non-exact division rejection
+    all_equations([0, 0, 0], ["0*0=0", "0+0=0", "0-0=0", "0=0*0", "0=0+0", "0=0-0"]),
+    all_equations([0, 5, 0], ["0*5=0", "0/5=0", "0=5*0"]),
+    all_equations([5, 0, 0], ["5*0=0"]),
+
+    % 4. Negative intermediate subexpressions (e.g., 3-5 = -2 and 2-4 = -2)
+    all_equations([3, 5, 2, 4], ["(3+5)/2=4", "3+5=2*4", "3-5=2-4", "3=5+(2-4)", "3=5+2-4"]),
+
+    % 5. Repeated numbers and distinct parenthesizations (injectivity check)
+    all_equations([2, 2, 2], []),
+    count_equations([2, 2, 2], 0),
+    count_equations([1, 1, 1, 1], 30),
+    all_equations([6, 3, 2, 1], [
+        "6-(3+2)=1", "6-3-2=1", "6-3=2+1",
+        "6/(3*2)=1", "6/3/2=1", "6/3=2*1", "6/3=2/1",
+        "6=3*(2*1)", "6=3*(2/1)", "6=3*2*1", "6=3*2/1",
+        "6=3+(2+1)", "6=3+2+1"
+    ]),
+
+    % 6. Check invariants across all test inputs
+    forall(
+        member(Input, [
+            [], [0], [9], [2, 3, 4], [2, 4, 8], [4, 2, 5, 3],
+            [0, 0, 0], [0, 5, 0], [5, 0, 0], [3, 5, 2, 4],
+            [2, 2, 2], [1, 1, 1, 1], [6, 3, 2, 1]
+        ]),
+        check_equation_invariants(Input)
+    ),
+
+    writeln('PASS: Final Q2 audit verified all invariants and edge cases.').
