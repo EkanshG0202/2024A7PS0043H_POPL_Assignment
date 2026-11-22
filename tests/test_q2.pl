@@ -87,3 +87,61 @@ run_eval_tests :-
     msort(Vals, [-2, 6, 8]),
 
     writeln('PASS: Expression evaluator verified across all valid and invalid cases.').
+
+    % run_format_tests
+% Verifies expr_to_string/2 and equation_to_string/3 against all canonical
+% precedence, associativity, and equation examples from the assignment.
+run_format_tests :-
+    % 1. Single number is never parenthesized and produces a string
+    expr_to_string(num(42), SNum),
+    string(SNum),
+    SNum == "42",
+
+    % 2. Assignment parenthesization and associativity examples
+    expr_to_string(expr(*, expr(+, num(4), num(2)), num(3)), "(4+2)*3"),
+    expr_to_string(expr(+, num(4), expr(*, num(2), num(3))), "4+2*3"),
+    expr_to_string(expr(*, expr(/, num(8), num(4)), num(2)), "8/4*2"),
+    expr_to_string(expr(/, num(8), expr(*, num(4), num(2))), "8/(4*2)"),
+    expr_to_string(expr(-, expr(-, num(1), num(2)), num(3)), "1-2-3"),
+    expr_to_string(expr(-, num(1), expr(-, num(2), num(3))), "1-(2-3)"),
+    expr_to_string(expr(+, num(1), expr(+, num(2), num(3))), "1+(2+3)"),
+    expr_to_string(expr(+, expr(+, num(1), num(2)), num(3)), "1+2+3"),
+
+    % 3. Additional mixed-precedence nested expressions
+    expr_to_string(expr(/, expr(-, num(9), num(3)), expr(+, num(1), num(2))), "(9-3)/(1+2)"),
+    expr_to_string(expr(-, expr(*, num(4), num(2)), expr(/, num(6), num(3))), "4*2-6/3"),
+    expr_to_string(expr(+, expr(-, num(5), num(2)), num(1)), "5-2+1"),
+    expr_to_string(expr(-, num(5), expr(+, num(2), num(1))), "5-(2+1)"),
+
+    % 4. Complete equation examples from the assignment (must be SWI-Prolog strings)
+    equation_to_string(expr(-, expr(*, num(4), num(2)), num(5)), num(3), Eq1),
+    string(Eq1), Eq1 == "4*2-5=3",
+
+    equation_to_string(expr(*, num(4), num(2)), expr(+, num(5), num(3)), Eq2),
+    string(Eq2), Eq2 == "4*2=5+3",
+
+    equation_to_string(expr(-, num(4), num(2)), expr(-, num(5), num(3)), Eq3),
+    string(Eq3), Eq3 == "4-2=5-3",
+
+    equation_to_string(expr(/, num(4), num(2)), expr(-, num(5), num(3)), Eq4),
+    string(Eq4), Eq4 == "4/2=5-3",
+
+    equation_to_string(num(4), expr(*, num(2), expr(-, num(5), num(3))), Eq5),
+    string(Eq5), Eq5 == "4=2*(5-3)",
+
+    equation_to_string(num(4), expr(+, num(2), expr(-, num(5), num(3))), Eq6),
+    string(Eq6), Eq6 == "4=2+(5-3)",
+
+    equation_to_string(num(4), expr(-, expr(+, num(2), num(5)), num(3)), Eq7),
+    string(Eq7), Eq7 == "4=2+5-3",
+
+    equation_to_string(expr(*, num(2), num(4)), num(8), Eq8),
+    string(Eq8), Eq8 == "2*4=8",
+
+    % 5. Injectivity check: all 320 distinct trees of [4,2,5,3] yield 320 distinct strings
+    findall(Str, (build_expr([4, 2, 5, 3], T), expr_to_string(T, Str)), AllStrs),
+    length(AllStrs, 320),
+    sort(AllStrs, UniqueStrs),
+    length(UniqueStrs, 320),
+
+    writeln('PASS: Canonical expression and equation formatter verified.').
