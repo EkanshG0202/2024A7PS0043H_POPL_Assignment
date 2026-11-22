@@ -33,3 +33,42 @@ candidate_solution([
     permutation(Depts, [D1, D2, D3, D4]),
     permutation(Langs, [L1, L2, L3, L4]),
     permutation(Projs, [P1, P2, P3, P4]).
+
+% clue_1(+Solution)
+% Declarative reading: In Solution, the friend whose project is 'AI'
+% does not work in research and is not 'Dana'.
+clue_1(Solution) :-
+    member(p(Name, Dept, _, 'AI'), Solution),
+    Name \= 'Dana',
+    Dept \= research.
+
+% clue_2(+Solution)
+% Declarative reading: In Solution, 'Alex' does not work in development
+% and does not have 'c++' as favorite language.
+clue_2(Solution) :-
+    member(p('Alex', Dept, Lang, _), Solution),
+    Dept \= development,
+    Lang \= 'c++'.
+
+% clue_3(+Solution)
+% Declarative reading: In Solution, the friend working in the testing
+% department has python as favorite language.
+clue_3(Solution) :-
+    member(p(_, testing, python, _), Solution).
+
+% clue_4(+Solution)
+% Declarative reading: In Solution, 'Ben' has web as project preference
+% and does not work in testing.
+clue_4(Solution) :-
+    member(p('Ben', Dept, _, web), Solution),
+    Dept \= testing.
+
+
+
+% clue(?N, +Solution)
+% Declarative reading: Clue number N holds in the complete assignment Solution.
+clue(1, Solution) :- clue_1(Solution).
+clue(2, Solution) :- clue_2(Solution).
+clue(3, Solution) :- clue_3(Solution).
+clue(4, Solution) :- clue_4(Solution).
+
