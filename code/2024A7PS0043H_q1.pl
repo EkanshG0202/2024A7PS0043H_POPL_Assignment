@@ -92,6 +92,12 @@ clue_8(Solution) :-
     member(p(_, research, Lang, data), Solution),
     Lang \= javascript.
 
+% clue_9(+Solution)
+% Declarative reading: In Solution, the friend whose favorite language is
+% python prefers 'AI' projects.
+clue_9(Solution) :-
+    member(p(_, _, python, 'AI'), Solution).
+
 % clue(?N, +Solution)
 % Declarative reading: Clue number N holds in the complete assignment Solution.
 clue(1, Solution) :- clue_1(Solution).
@@ -102,6 +108,7 @@ clue(5, Solution) :- clue_5(Solution).
 clue(6, Solution) :- clue_6(Solution).
 clue(7, Solution) :- clue_7(Solution).
 clue(8, Solution) :- clue_8(Solution).
+clue(9, Solution) :- clue_9(Solution).
 
 % satisfies_clues(+ClueIds, +Solution)
 % Declarative reading: Every clue number in ClueIds holds in Solution.

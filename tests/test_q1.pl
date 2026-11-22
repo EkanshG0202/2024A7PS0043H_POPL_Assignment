@@ -255,3 +255,39 @@ run_count_tests :-
     count_solutions([1, 2, 3, 4, 5, 6, 7, 8], 3),
 
     writeln('PASS: count_solutions/2 verified across all clue combinations.').
+
+    % run_clue_9_tests
+% Verifies clue(9, Solution) independently and confirms that adding Clue 9
+% to Clues 1-8 reduces the solution count from 3 to 1.
+run_clue_9_tests :-
+    % Positive case (Solution 2: python paired with 'AI')
+    ExpectedUnique = [
+        p('Alex',  design,      java,       embedded),
+        p('Ben',   development, javascript, web),
+        p('Carla', testing,     python,     'AI'),
+        p('Dana',  research,    'c++',      data)
+    ],
+    clue(9, ExpectedUnique),
+
+    % Negative cases (Solutions 1 and 3: python paired with embedded)
+    \+ clue(9, [
+        p('Alex',  design,      java,       'AI'),
+        p('Ben',   development, javascript, web),
+        p('Carla', research,    'c++',      data),
+        p('Dana',  testing,     python,     embedded)
+    ]),
+    \+ clue(9, [
+        p('Alex',  testing,     python,     embedded),
+        p('Ben',   development, javascript, web),
+        p('Carla', design,      java,       'AI'),
+        p('Dana',  research,    'c++',      data)
+    ]),
+
+    % Unbiased count check on Clue 9 alone
+    count_solutions([9], 3456),
+
+    % P1.c requirement: Clues 1..9 leave N = 1 unique solution
+    count_solutions([1, 2, 3, 4, 5, 6, 7, 8, 9], 1),
+    solve_clues([1, 2, 3, 4, 5, 6, 7, 8, 9], ExpectedUnique),
+
+    writeln('PASS: Clue 9 verified; clues 1-9 yield N = 1 unique solution.').
