@@ -137,3 +137,10 @@ print_solution([p(Name, Dept, Lang, Project) | Rest]) :-
 main :-
     once(solve(Solution)),
     print_solution(Solution).
+
+% count_solutions(+Active, -N)
+% Declarative reading: N is the number of valid candidate assignments that
+% satisfy every clue in Active while ignoring all clues not in Active.
+count_solutions(Active, N) :-
+    findall(Solution, solve_clues(Active, Solution), Solutions),
+    length(Solutions, N).

@@ -226,3 +226,32 @@ run_solver_tests :-
     )),
 
     writeln('PASS: Solver and main/0 output format verified end-to-end.').
+
+    % run_count_tests
+% Verifies count_solutions/2 across empty, single-clue, subset, and full
+% clue lists to ensure all solutions are counted and unselected clues are ignored.
+run_count_tests :-
+    % Empty active-clue list -> all 13,824 candidate assignments
+    count_solutions([], 13824),
+
+    % Single clues
+    count_solutions([1], 7776),
+    count_solutions([2], 7776),
+    count_solutions([3], 3456),
+    count_solutions([4], 2592),
+    count_solutions([5], 3456),
+    count_solutions([6], 7776),
+    count_solutions([7], 5184),
+    count_solutions([8], 2592),
+
+    % Subsets of clues (unselected clues remain unenforced)
+    count_solutions([1, 2], 4320),
+    count_solutions([3, 5], 1152),
+    count_solutions([1, 2, 3, 4], 208),
+    count_solutions([5, 6, 7, 8], 144),
+    count_solutions([1, 2, 3, 4, 5, 6, 7], 16),
+
+    % Full set of clues 1 to 8
+    count_solutions([1, 2, 3, 4, 5, 6, 7, 8], 3),
+
+    writeln('PASS: count_solutions/2 verified across all clue combinations.').
