@@ -15,43 +15,43 @@
   (display expr)
   (newline))
 
-;; --- S2.c Tests: make-inserter with various length predicates ---
+;; --- 1. Supplied Examples via print-insert-result (reads from stdin) ---
+(print-insert-result)
+(print-insert-result)
+(print-insert-result)
+(print-insert-result)
 
-;; 1. Insert 'empty only into empty lists: len-ok? = (lambda (len) (= len 0))
-(define insert-into-empty (make-inserter 'empty (lambda (len) (= len 0))))
-(show (insert-into-empty '(() (1) (() 2) (3 4))))
-;; Expected: ((empty) (1) ((empty) 2) (3 4))
+;; --- 2. Edge Cases: Nested Empty Lists & Boundary Lengths (n-1, n, n+1) ---
+;; Threshold n = 2: lengths 0, 1 get 'b; lengths 2, 3 unchanged; outer length 4 unchanged
+(show (insert-if-short 'b '(() (1) (1 2) (1 2 3)) 2))
+;; Expected: ((b) (b 1) (1 2) (1 2 3))
 
-;; 2. Insert 'long into lists with length >= 2: len-ok? = (lambda (len) (>= len 2))
-(define insert-if-long (make-inserter 'long (lambda (len) (>= len 2))))
-(show (insert-if-long '((1) (2 3) ((4 5 6) ()))))
-;; Expected: (long (1) (long 2 3) (long (long 4 5 6) ()))
+;; Deeply nested empty lists with n = 1
+(show (insert-if-short 9 '(((()))) 1))
+;; Expected: ((((9))))
 
-;; 3. Insert '* into lists with even length (0, 2, 4, ...):
-(define (even-len? len)
-  (if (= len 0)
-      #t
-      (if (= len 1)
-          #f
-          (even-len? (- len 2)))))
-(define insert-if-even (make-inserter '* even-len?))
-(show (insert-if-even '(() (a) (b c) (d e f))))
-;; Expected: (* (*) (a) (* b c) (d e f))
+;; --- 3. Stress Test A: Nesting Depth 100 ---
+(define (make-nested-depth d inner)
+  (if (= d 0)
+      inner
+      (make-nested-depth (- d 1) (cons inner '()))))
 
-;; --- S2.b/S2.c Regression Tests: insert-if-short ---
+(define deep-100 (make-nested-depth 100 '()))
+;; Each level has length 1 except innermost '() which has length 0.
+;; With n = 1, only innermost '() becomes (x); with n = 2, all 101 lists get x.
+(define res-deep-n1 (insert-if-short 'x deep-100 1))
+(define res-deep-n2 (insert-if-short 'x deep-100 2))
+(show (my-length res-deep-n1)) ;; Expected: 1
+(show (my-length res-deep-n2)) ;; Expected: 2
 
-;; Supplied Example 1: ((42 1 2) (3 4 5) (42 6) (42))
-(show (insert-if-short 42 '((1 2) (3 4 5) (6) ()) 3))
+;; --- 4. Stress Test B: 10,000-Element List ---
+(define (make-flat-list k)
+  (let loop ((i k) (acc '()))
+    (if (= i 0)
+        acc
+        (loop (- i 1) (cons i acc)))))
 
-;; Supplied Example 2: ((0 (0 1) 2) (0 3) (0 (4 5 6) (0)))
-(show (insert-if-short 0 '(((1) 2) (3) ((4 5 6) ())) 3))
-
-;; Supplied Example 3: (7)
-(show (insert-if-short 7 '() 3))
-
-;; Supplied Example 4: ()
-(show (insert-if-short 7 '() 0))
-
-;; Boundary check: lengths 0, 1, 2, 3 with threshold n = 2
-(show (insert-if-short 'x '(() (a) (a b) (a b c)) 2))
-;; Expected: ((x) (x a) (a b) (a b c))
+(define big-10k (make-flat-list 10000))
+(show (my-length (insert-if-short 'head big-10k 10000))) ;; Expected: 10000 (not < 10000)
+(show (my-length (insert-if-short 'head big-10k 10001))) ;; Expected: 10001 (< 10001 -> inserted)
+(show (car (insert-if-short 'head big-10k 10001)))       ;; Expected: head
