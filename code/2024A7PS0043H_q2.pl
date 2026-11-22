@@ -22,3 +22,26 @@ build_expr(Numbers, expr(Op, Left, Right)) :-
     build_expr(LeftNums, Left),
     build_expr(RightNums, Right),
     operator(Op).
+
+% eval_expr(+Expr, -Value)
+% Declarative reading: Value is the exact integer value of expression tree Expr,
+% where every division has a non-zero divisor and zero remainder.
+eval_expr(num(N), N).
+eval_expr(expr(+, Left, Right), Value) :-
+    eval_expr(Left, VL),
+    eval_expr(Right, VR),
+    Value is VL + VR.
+eval_expr(expr(-, Left, Right), Value) :-
+    eval_expr(Left, VL),
+    eval_expr(Right, VR),
+    Value is VL - VR.
+eval_expr(expr(*, Left, Right), Value) :-
+    eval_expr(Left, VL),
+    eval_expr(Right, VR),
+    Value is VL * VR.
+eval_expr(expr(/, Left, Right), Value) :-
+    eval_expr(Left, VL),
+    eval_expr(Right, VR),
+    VR =\= 0,
+    VL mod VR =:= 0,
+    Value is VL // VR.

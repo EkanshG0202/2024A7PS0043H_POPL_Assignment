@@ -47,3 +47,43 @@ run_expr_gen_tests :-
     forall(member(Tree, E4), tree_leaves(Tree, [4, 2, 5, 3])),
 
     writeln('PASS: Expression tree generator verified across all test cases.').
+
+    % run_eval_tests
+% Tests eval_expr/2 on normal arithmetic, negative intermediate results,
+% exact divisions, non-exact divisions (including nested), and division by zero.
+run_eval_tests :-
+    % 1. Normal arithmetic expressions
+    eval_expr(num(7), 7),
+    eval_expr(expr(+, num(4), num(2)), 6),
+    eval_expr(expr(*, expr(+, num(4), num(2)), num(3)), 18),
+    eval_expr(expr(+, num(4), expr(*, num(2), num(3))), 10),
+
+    % 2. Negative intermediate results
+    eval_expr(expr(-, num(3), num(5)), -2),
+    eval_expr(expr(*, num(2), expr(-, num(3), num(5))), -4),
+    eval_expr(expr(+, expr(-, num(2), num(7)), num(10)), 5),
+
+    % 3. Exact integer divisions (including zero numerator and negative operands)
+    eval_expr(expr(/, num(4), num(2)), 2),
+    eval_expr(expr(/, num(0), num(5)), 0),
+    eval_expr(expr(*, expr(/, num(8), num(4)), num(2)), 4),
+    eval_expr(expr(/, expr(-, num(3), num(9)), num(3)), -2),
+    eval_expr(expr(/, num(6), expr(-, num(2), num(5))), -2),
+    eval_expr(expr(/, expr(-, num(3), num(9)), expr(-, num(2), num(5))), 2),
+
+    % 4. Non-exact divisions fail cleanly (including nested inside valid outer ops)
+    \+ eval_expr(expr(/, num(5), num(2)), _),
+    \+ eval_expr(expr(/, num(1), num(2)), _),
+    \+ eval_expr(expr(/, expr(-, num(2), num(5)), num(2)), _),
+    \+ eval_expr(expr(*, expr(/, num(3), num(2)), num(4)), _),
+
+    % 5. Division by zero fails cleanly without throwing an exception
+    \+ eval_expr(expr(/, num(5), num(0)), _),
+    \+ eval_expr(expr(/, num(0), num(0)), _),
+    \+ eval_expr(expr(+, num(1), expr(/, num(4), expr(-, num(3), num(3)))), _),
+
+    % 6. Combined check with build_expr/2: [2, 4] has 3 valid evaluations (2/4 rejected)
+    findall(V, (build_expr([2, 4], E), eval_expr(E, V)), Vals),
+    msort(Vals, [-2, 6, 8]),
+
+    writeln('PASS: Expression evaluator verified across all valid and invalid cases.').
