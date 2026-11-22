@@ -114,3 +114,12 @@ valid_equation_tree(Numbers, eq(LeftExpr, RightExpr)) :-
     build_expr(RightNums, RightExpr),
     eval_expr(RightExpr, RightVal),
     LeftVal =:= RightVal.
+
+% generate_equation(+List, -Equation)
+% Declarative reading: Equation is a canonical SWI-Prolog string representing
+% a valid arithmetic equation formed from the numbers in List in order.
+% Fails cleanly without looping or raising an error if no valid equation exists.
+generate_equation(List, Equation) :-
+    is_list(List),
+    valid_equation_tree(List, eq(LeftExpr, RightExpr)),
+    equation_to_string(LeftExpr, RightExpr, Equation).

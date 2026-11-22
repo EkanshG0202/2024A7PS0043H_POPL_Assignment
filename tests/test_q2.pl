@@ -210,3 +210,45 @@ run_search_tests :-
     ]),
 
     writeln('PASS: Equation tree search verified across split positions and edge cases.').
+
+    % run_generate_equation_tests
+% Tests generate_equation/2 on assignment examples, length 0/1 lists,
+% unsolvable sequences, and SWI-Prolog string type requirements.
+run_generate_equation_tests :-
+    % 1. Lists of length 0 and 1 must fail cleanly without error or looping
+    \+ generate_equation([], _),
+    \+ generate_equation([0], _),
+    \+ generate_equation([42], _),
+
+    % 2. Assignment unsolvable example fails cleanly
+    \+ generate_equation([2, 3, 4], _),
+
+    % 3. Assignment example: [4, 2, 5, 3] yields a canonical string from the 7 valid equations
+    generate_equation([4, 2, 5, 3], Eq1),
+    string(Eq1),
+    \+ atom(Eq1),
+    member(Eq1, [
+        "4*2-5=3",
+        "4*2=5+3",
+        "4-2=5-3",
+        "4/2=5-3",
+        "4=2*(5-3)",
+        "4=2+(5-3)",
+        "4=2+5-3"
+    ]),
+
+    % 4. Assignment example: [2, 4, 8] yields "2*4=8" as a string
+    generate_equation([2, 4, 8], Eq2),
+    string(Eq2),
+    Eq2 == "2*4=8",
+
+    % 5. Additional cases: zeros (testing non-zero divisor guard) and negative intermediates
+    generate_equation([0, 5, 0], Eq3),
+    string(Eq3),
+    member(Eq3, ["0*5=0", "0/5=0", "0=5*0"]),
+
+   generate_equation([1, 2, 3, 2], Eq4),
+    string(Eq4),
+    member(Eq4, ["1-2+3=2", "1=2-3+2", "1=2-(3-2)"]),
+
+    writeln('PASS: generate_equation/2 verified across all examples and edge cases.').
