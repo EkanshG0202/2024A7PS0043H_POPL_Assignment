@@ -15,3 +15,17 @@
       '()
       (cons (f (car lst))
             (my-map f (cdr lst)))))
+
+;; --- Conditional Insertion (S2.b) ---
+
+;; Inserts atom x at the front of lst and every nested sublist whose original length < n
+(define (insert-if-short x lst n)
+  (let ((processed
+         (my-map (lambda (elem)
+                   (if (or (null? elem) (pair? elem))
+                       (insert-if-short x elem n)
+                       elem))
+                 lst)))
+    (if (< (my-length lst) n)
+        (cons x processed)
+        processed)))
