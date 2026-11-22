@@ -1,3 +1,4 @@
+
 :- use_module(library(lists)).
 :- consult('../code/2024A7PS0043H_q1.pl').
 
@@ -197,10 +198,10 @@ run_clue_5_to_8_tests :-
     writeln('PASS: Clues 5-8 passed all positive, negative, and count checks.').
 
 % run_solver_tests
-% Verifies that solve/1 derives all 3 valid solutions satisfying clues 1 to 8
-% without stopping prematurely, and that main/0 prints the exact expected format.
+% Verifies that solve/1 derives all 3 valid solutions satisfying clues 1-8
+% and that main/0 prints the required four-line format.
 run_solver_tests :-
-    % 1. Verify solve/1 backtracks across all 3 valid solutions
+    % 1. Verify solve/1 backtracks across all 3 valid solutions.
     findall(S, solve(S), Solutions),
     length(Solutions, 3),
     forall(member(Sol, Solutions), (
@@ -208,19 +209,32 @@ run_solver_tests :-
         forall(member(N, [1, 2, 3, 4, 5, 6, 7, 8]), clue(N, Sol))
     )),
 
-    % 2. Verify main/0 output format (4 friend blocks, unquoted atoms)
+    % 2. Capture and verify main/0 output.
     with_output_to(string(Output), main),
     split_string(Output, "\n", "", Lines),
+
     Lines = [
-        "Alex",    AlexInfo,
-        "Ben",     BenInfo,
-        "Carla",   CarlaInfo,
-        "Dana",    DanaInfo,
+        AlexLine,
+        BenLine,
+        CarlaLine,
+        DanaLine,
         ""
     ],
-    forall(member(Line, [AlexInfo, BenInfo, CarlaInfo, DanaInfo]), (
-        sub_string(Line, 0, 1, _, "["),
-        sub_string(Line, _, 1, 0, "]"),
+
+    % Verify exact friend-name prefixes.
+    sub_string(AlexLine, 0, 8, _, "Alex = ["),
+    sub_string(BenLine, 0, 7, _, "Ben = ["),
+    sub_string(CarlaLine, 0, 9, _, "Carla = ["),
+    sub_string(DanaLine, 0, 8, _, "Dana = ["),
+
+    % Verify each line ends with a closing bracket.
+    sub_string(AlexLine, _, 1, 0, "]"),
+    sub_string(BenLine, _, 1, 0, "]"),
+    sub_string(CarlaLine, _, 1, 0, "]"),
+    sub_string(DanaLine, _, 1, 0, "]"),
+
+    % Verify no quoted atoms appear in the printed output.
+    forall(member(Line, [AlexLine, BenLine, CarlaLine, DanaLine]), (
         \+ sub_string(Line, _, _, _, "'")
     )),
 
