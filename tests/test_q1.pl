@@ -195,3 +195,34 @@ run_clue_5_to_8_tests :-
     findall(S, (candidate_solution(S), clue(8, S)), S8), length(S8, 2592),
 
     writeln('PASS: Clues 5-8 passed all positive, negative, and count checks.').
+
+    % run_solver_tests
+% Verifies that solve/1 derives valid solutions satisfying clues 1 to 8
+% without stopping prematurely, and that main/0 prints the exact expected format.
+run_solver_tests :-
+    % 1. Verify solve/1 backtracks across all valid solutions
+    findall(S, solve(S), Solutions),
+    Solutions \= [],
+    forall(member(Sol, Solutions), (
+        valid_candidate(Sol),
+        forall(member(N, [1, 2, 3, 4, 5, 6, 7, 8]), clue(N, Sol))
+    )),
+
+    % 2. Verify main/0 output format (4 friend blocks = 8 lines, unquoted atoms)
+    with_output_to(string(Output), main),
+    split_string(Output, "\n", "", Lines),
+    % Trailing newline produces 8 content lines + 1 empty element
+    Lines = [
+        "Alex",    AlexInfo,
+        "Ben",     BenInfo,
+        "Carla",   CarlaInfo,
+        "Dana",    DanaInfo,
+        ""
+    ],
+    forall(member(Line, [AlexInfo, BenInfo, CarlaInfo, DanaInfo]), (
+        sub_string(Line, 0, 1, _, "["),
+        sub_string(Line, _, 1, 0, "]"),
+        \+ sub_string(Line, _, _, _, "'")
+    )),
+
+    writeln('PASS: Solver and main/0 output format verified end-to-end.').

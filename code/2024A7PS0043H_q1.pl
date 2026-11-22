@@ -102,3 +102,38 @@ clue(5, Solution) :- clue_5(Solution).
 clue(6, Solution) :- clue_6(Solution).
 clue(7, Solution) :- clue_7(Solution).
 clue(8, Solution) :- clue_8(Solution).
+
+% satisfies_clues(+ClueIds, +Solution)
+% Declarative reading: Every clue number in ClueIds holds in Solution.
+satisfies_clues([], _).
+satisfies_clues([N | Rest], Solution) :-
+    clue(N, Solution),
+    satisfies_clues(Rest, Solution).
+
+% solve_clues(+ClueIds, -Solution)
+% Declarative reading: Solution is a valid candidate assignment that satisfies
+% all clues listed in ClueIds. Generates candidates before testing clues so all
+% variables are ground when negative constraints are evaluated.
+solve_clues(ClueIds, Solution) :-
+    candidate_solution(Solution),
+    satisfies_clues(ClueIds, Solution).
+
+% solve(-Solution)
+% Declarative reading: Solution is a valid assignment satisfying clues 1 to 8.
+solve(Solution) :-
+    solve_clues([1, 2, 3, 4, 5, 6, 7, 8], Solution).
+
+% print_solution(+Solution)
+% Declarative reading: Prints each friend's name followed by [Dept, Lang, Project]
+% with unquoted atoms in the required layout.
+print_solution([]).
+print_solution([p(Name, Dept, Lang, Project) | Rest]) :-
+    format('~w~n[~w, ~w, ~w]~n', [Name, Dept, Lang, Project]),
+    print_solution(Rest).
+
+% main
+% Declarative reading: Derives one valid solution for clues 1 to 8 and prints it
+% in the required format.
+main :-
+    once(solve(Solution)),
+    print_solution(Solution).
