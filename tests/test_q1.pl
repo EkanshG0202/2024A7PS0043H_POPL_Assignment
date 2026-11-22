@@ -104,7 +104,7 @@ run_clue_1_to_4_tests :-
 
     writeln('PASS: Clues 1-4 passed all positive, negative, and count checks.').
 
-    % run_clue_5_to_8_tests
+% run_clue_5_to_8_tests
 % Tests clues 5-8 independently on satisfying and violating candidates,
 % and verifies exact combinatoric counts over all 13,824 candidates.
 run_clue_5_to_8_tests :-
@@ -196,22 +196,21 @@ run_clue_5_to_8_tests :-
 
     writeln('PASS: Clues 5-8 passed all positive, negative, and count checks.').
 
-    % run_solver_tests
-% Verifies that solve/1 derives valid solutions satisfying clues 1 to 8
+% run_solver_tests
+% Verifies that solve/1 derives all 3 valid solutions satisfying clues 1 to 8
 % without stopping prematurely, and that main/0 prints the exact expected format.
 run_solver_tests :-
-    % 1. Verify solve/1 backtracks across all valid solutions
+    % 1. Verify solve/1 backtracks across all 3 valid solutions
     findall(S, solve(S), Solutions),
-    Solutions \= [],
+    length(Solutions, 3),
     forall(member(Sol, Solutions), (
         valid_candidate(Sol),
         forall(member(N, [1, 2, 3, 4, 5, 6, 7, 8]), clue(N, Sol))
     )),
 
-    % 2. Verify main/0 output format (4 friend blocks = 8 lines, unquoted atoms)
+    % 2. Verify main/0 output format (4 friend blocks, unquoted atoms)
     with_output_to(string(Output), main),
     split_string(Output, "\n", "", Lines),
-    % Trailing newline produces 8 content lines + 1 empty element
     Lines = [
         "Alex",    AlexInfo,
         "Ben",     BenInfo,
@@ -227,9 +226,10 @@ run_solver_tests :-
 
     writeln('PASS: Solver and main/0 output format verified end-to-end.').
 
-    % run_count_tests
-% Verifies count_solutions/2 across empty, single-clue, subset, and full
-% clue lists to ensure all solutions are counted and unselected clues are ignored.
+% run_count_tests
+% Verifies count_solutions/2 across empty, single-clue, subset, reordered,
+% and full clue lists to ensure all solutions are counted and unselected clues
+% are ignored.
 run_count_tests :-
     % Empty active-clue list -> all 13,824 candidate assignments
     count_solutions([], 13824),
@@ -251,12 +251,13 @@ run_count_tests :-
     count_solutions([5, 6, 7, 8], 144),
     count_solutions([1, 2, 3, 4, 5, 6, 7], 16),
 
-    % Full set of clues 1 to 8
+    % Full set of clues 1 to 8 (in forward and reverse order)
     count_solutions([1, 2, 3, 4, 5, 6, 7, 8], 3),
+    count_solutions([8, 7, 6, 5, 4, 3, 2, 1], 3),
 
     writeln('PASS: count_solutions/2 verified across all clue combinations.').
 
-    % run_clue_9_tests
+% run_clue_9_tests
 % Verifies clue(9, Solution) independently and confirms that adding Clue 9
 % to Clues 1-8 reduces the solution count from 3 to 1.
 run_clue_9_tests :-
@@ -291,3 +292,14 @@ run_clue_9_tests :-
     solve_clues([1, 2, 3, 4, 5, 6, 7, 8, 9], ExpectedUnique),
 
     writeln('PASS: Clue 9 verified; clues 1-9 yield N = 1 unique solution.').
+
+% run_all_tests
+% Runs the complete Q1 verification suite.
+run_all_tests :-
+    run_generator_tests,
+    run_clue_1_to_4_tests,
+    run_clue_5_to_8_tests,
+    run_solver_tests,
+    run_count_tests,
+    run_clue_9_tests,
+    writeln('ALL Q1 TESTS PASSED.').

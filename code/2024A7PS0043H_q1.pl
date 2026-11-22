@@ -131,11 +131,11 @@ solve(Solution) :-
     solve_clues([1, 2, 3, 4, 5, 6, 7, 8], Solution).
 
 % print_solution(+Solution)
-% Declarative reading: Prints each friend's name followed by [Dept, Lang, Project]
-% with unquoted atoms in the required layout.
+% Declarative reading: Prints each friend in the required four-line format
+% Name = [Dept, Lang, Project] with unquoted atoms.
 print_solution([]).
 print_solution([p(Name, Dept, Lang, Project) | Rest]) :-
-    format('~w~n[~w, ~w, ~w]~n', [Name, Dept, Lang, Project]),
+    format('~w = [~w, ~w, ~w]~n', [Name, Dept, Lang, Project]),
     print_solution(Rest).
 
 % main
