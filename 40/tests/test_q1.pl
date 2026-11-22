@@ -1,6 +1,6 @@
 
 :- use_module(library(lists)).
-:- consult('../code/2024A7PS0043H_q1.pl').
+:- consult('../code/40_q1.pl').
 
 % valid_candidate(+Solution)
 % Declarative reading: Solution has the four friends in canonical order and

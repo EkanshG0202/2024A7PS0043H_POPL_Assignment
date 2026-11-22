@@ -1,5 +1,5 @@
 :- use_module(library(lists)).
-:- consult('../code/2024A7PS0043H_q2.pl').
+:- consult('../code/40_q2.pl').
 
 % tree_leaves(+Expr, -Leaves)
 % Declarative reading: Leaves is the left-to-right list of numbers appearing
