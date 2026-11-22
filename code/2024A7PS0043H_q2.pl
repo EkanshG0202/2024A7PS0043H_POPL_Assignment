@@ -123,3 +123,18 @@ generate_equation(List, Equation) :-
     is_list(List),
     valid_equation_tree(List, eq(LeftExpr, RightExpr)),
     equation_to_string(LeftExpr, RightExpr, Equation).
+
+% all_equations(+List, -Equations)
+% Declarative reading: Equations is the duplicate-free list of all valid
+% canonical equation strings for List, sorted in standard term order by sort/2.
+% Unifies Equations with [] when no valid equation exists.
+all_equations(List, Equations) :-
+    is_list(List),
+    findall(Equation, generate_equation(List, Equation), RawEquations),
+    sort(RawEquations, Equations).
+
+% count_equations(+List, -N)
+% Declarative reading: N is the number of distinct valid equations for List.
+count_equations(List, N) :-
+    all_equations(List, Equations),
+    length(Equations, N).

@@ -252,3 +252,65 @@ run_generate_equation_tests :-
     member(Eq4, ["1-2+3=2", "1=2-3+2", "1=2-(3-2)"]),
 
     writeln('PASS: generate_equation/2 verified across all examples and edge cases.').
+
+    % run_all_equations_tests
+% Verifies all_equations/2 and count_equations/2 on assignment examples,
+% empty/singleton inputs, zero-divisor cases, and sorted term ordering.
+run_all_equations_tests :-
+    % 1. Lists of length 0 and 1 return [] and count 0
+    all_equations([], []),
+    count_equations([], 0),
+    all_equations([7], []),
+    count_equations([7], 0),
+
+    % 2. Assignment unsolvable example: [2, 3, 4] -> [] and 0
+    all_equations([2, 3, 4], []),
+    count_equations([2, 3, 4], 0),
+
+    % 3. Assignment example: [2, 4, 8] -> ["2*4=8"] and 1
+    all_equations([2, 4, 8], Eqs248),
+    Eqs248 == ["2*4=8"],
+    forall(member(E, Eqs248), string(E)),
+    count_equations([2, 4, 8], 1),
+
+    % 4. Assignment example: [4, 2, 5, 3] -> exact 7 strings in sort/2 order
+    all_equations([4, 2, 5, 3], Eqs4253),
+    Eqs4253 == [
+        "4*2-5=3",
+        "4*2=5+3",
+        "4-2=5-3",
+        "4/2=5-3",
+        "4=2*(5-3)",
+        "4=2+(5-3)",
+        "4=2+5-3"
+    ],
+    forall(member(E, Eqs4253), string(E)),
+    count_equations([4, 2, 5, 3], 7),
+
+    % 5. Additional cases: zeros and negative intermediates
+    all_equations([0, 5, 0], Eqs050),
+    Eqs050 == ["0*5=0", "0/5=0", "0=5*0"],
+    count_equations([0, 5, 0], 3),
+
+    all_equations([1, 2, 3, 2], Eqs1232),
+    Eqs1232 == ["1-(2-3)=2", "1-2+3=2", "1=2-(3-2)", "1=2-3+2"],
+    count_equations([1, 2, 3, 2], 4),
+
+    % 6. Repeated numbers: [1, 1, 1, 1] -> 30 distinct canonical trees/strings
+    all_equations([1, 1, 1, 1], Eqs1111),
+    sort(Eqs1111, Sorted1111),
+    Eqs1111 == Sorted1111,
+    count_equations([1, 1, 1, 1], 30),
+
+    writeln('PASS: all_equations/2 and count_equations/2 verified.').
+
+% run_all_q2_tests
+% Runs the complete Q2 verification suite.
+run_all_q2_tests :-
+    run_expr_gen_tests,
+    run_eval_tests,
+    run_format_tests,
+    run_search_tests,
+    run_generate_equation_tests,
+    run_all_equations_tests,
+    writeln('ALL Q2 TESTS PASSED.').
